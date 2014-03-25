@@ -161,7 +161,7 @@
             if (statTrackerLink.innerText === "StatTracker not available") {
                 var statTrackerClasses = document.getElementsByClassName('Navitem Navitem-main statracker has-live-games');
                 if (statTrackerClasses.length > 0) {
-                    var statTrackerAnchors = statTrackerClasses[0].getElementByTagName('a');
+                    var statTrackerAnchors = statTrackerClasses[0].getElementsByTagName('a');
                     if (statTrackerAnchors.length > 0) {
                         statTrackerLink = document.createElement('a');
                         statTrackerLink.setAttribute('href',baseURL + statTrackerAnchors[0].getAttribute('href'));
