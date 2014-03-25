@@ -126,64 +126,76 @@
                         
             var baseURL = fantasyURL.substr(0, fantasyURL.search(/[^\/]\/(?!\/)/)+1);
             
-           // here we go
-           title = doc.title;
-           title = title.split('- ')[1];
-           
-           var MatchupList = doc.getElementById('scoreboard-fantasy').getElementsByClassName('yfa-matchup')[0];       
-           var anchors = MatchupList.getElementsByTagName('a');
-           var firstTeam = document.createElement('a');
-           firstTeam.setAttribute('href',baseURL + anchors[0].getAttribute('href'));
-           firstTeam.innerText = anchors[0].innerText;
-           var firstTeamScore = MatchupList.getElementsByTagName('span')[0].innerText;
-           var secondTeam = document.createElement('a');
-           secondTeam.setAttribute('href',baseURL + anchors[1].getAttribute('href'));
-           secondTeam.innerText = anchors[1].innerText;
-           var secondTeamScore = MatchupList.getElementsByTagName('span')[1].innerText;
-           
-           var matchupLink = document.createElement('span');
-           matchupLink.innerText = "Match Up link not available";
-           var statTrackerLink = document.createElement('span');
-           statTrackerLink.innerText = "StatTracker not available";
+            // here we go
+            title = doc.title;
+            title = title.split('- ')[1];
             
-           for (var i = 0; i < anchors.length; i++) {
+            var MatchupList = doc.getElementById('scoreboard-fantasy').getElementsByClassName('yfa-matchup')[0];       
+            var anchors = MatchupList.getElementsByTagName('a');
+            var firstTeam = document.createElement('a');
+            firstTeam.setAttribute('href',baseURL + anchors[0].getAttribute('href'));
+            firstTeam.innerText = anchors[0].innerText;
+            var firstTeamScore = MatchupList.getElementsByTagName('span')[0].innerText;
+            var secondTeam = document.createElement('a');
+            secondTeam.setAttribute('href',baseURL + anchors[1].getAttribute('href'));
+            secondTeam.innerText = anchors[1].innerText;
+            var secondTeamScore = MatchupList.getElementsByTagName('span')[1].innerText;
+            
+            var matchupLink = document.createElement('span');
+            matchupLink.innerText = "Match Up link not available";
+            var statTrackerLink = document.createElement('span');
+            statTrackerLink.innerText = "StatTracker not available";
+            
+            for (var i = 0; i < anchors.length; i++) {
                 if (anchors[i].innerText === "Match Up") { 
                     matchupLink = document.createElement('a');
-                       matchupLink.setAttribute('href',baseURL + anchors[2].getAttribute('href'));
-                       matchupLink.innerText = anchors[2].innerText;
+                    matchupLink.setAttribute('href',baseURL + anchors[i].getAttribute('href'));
+                    matchupLink.innerText = anchors[i].innerText;
                 } else if (anchors[i].innerText.search("StatTracker") > -1) {
                     statTrackerLink = document.createElement('a');
-                    statTrackerLink.setAttribute('href',baseURL + anchors[3].getAttribute('href'));
-                       statTrackerLink.innerText = anchors[3].innerText;
-                       statTrackerLink.style.fontWeight = 'bold';
+                    statTrackerLink.setAttribute('href',baseURL + anchors[i].getAttribute('href'));
+                    statTrackerLink.innerText = anchors[i].innerText;
+                    statTrackerLink.style.fontWeight = 'bold';
                 }
-           }
-           
-           table = document.createElement('table');
-           table.id = 'MyYahooFantasyTableId';
-           var tr = document.createElement('tr');
-           tr.appendChild( document.createElement('td') );
-           tr.appendChild( document.createElement('td') );
-           tr.appendChild( document.createElement('td') );
-           tr.cells[0].appendChild( firstTeam );
-           tr.cells[1].appendChild( document.createTextNode(firstTeamScore) );
-           tr.cells[2].appendChild( matchupLink );
-           tr.cells[2].setAttribute('align', 'right');
-           tr.cells[2].setAttribute('width', '60px');
-           table.appendChild(tr);
-           tr = document.createElement('tr');
-           tr.appendChild( document.createElement('td') );
-           tr.appendChild( document.createElement('td') );
-           tr.cells[0].appendChild( secondTeam );
-           tr.cells[1].appendChild( document.createTextNode(secondTeamScore) );
-           table.appendChild(tr);
-           tr = document.createElement('tr');
-           tr.appendChild( document.createElement('td') );
-           tr.cells[0].appendChild( statTrackerLink );
-           table.appendChild(tr);
+            }
+            if (statTrackerLink.innerText === "StatTracker not available") {
+                var statTrackerClasses = document.getElementsByClassName('Navitem Navitem-main statracker has-live-games');
+                if (statTrackerClasses.length > 0) {
+                    var statTrackerAnchors = statTrackerClasses[0].getElementByTagName('a');
+                    if (statTrackerAnchors.length > 0) {
+                        statTrackerLink = document.createElement('a');
+                        statTrackerLink.setAttribute('href',baseURL + statTrackerAnchors[0].getAttribute('href'));
+                        statTrackerLink.innerText = "StatTracker";
+                        statTrackerLink.style.fontWeight = 'bold';
+                    }
+                }
+            }
+            
+            table = document.createElement('table');
+            table.id = 'MyYahooFantasyTableId';
+            var tr = document.createElement('tr');
+            tr.appendChild( document.createElement('td') );
+            tr.appendChild( document.createElement('td') );
+            tr.appendChild( document.createElement('td') );
+            tr.cells[0].appendChild( firstTeam );
+            tr.cells[1].appendChild( document.createTextNode(firstTeamScore) );
+            tr.cells[2].appendChild( matchupLink );
+            tr.cells[2].setAttribute('align', 'right');
+            tr.cells[2].setAttribute('width', '60px');
+            table.appendChild(tr);
+            tr = document.createElement('tr');
+            tr.appendChild( document.createElement('td') );
+            tr.appendChild( document.createElement('td') );
+            tr.cells[0].appendChild( secondTeam );
+            tr.cells[1].appendChild( document.createTextNode(secondTeamScore) );
+            table.appendChild(tr);
+            tr = document.createElement('tr');
+            tr.appendChild( document.createElement('td') );
+            tr.cells[0].appendChild( statTrackerLink );
+            table.appendChild(tr);
         }
         else {
-             title = "MyYahoo - Add FBB Link";
+            title = "MyYahoo - Add FBB Link";
             table = document.createElement('table');
         }
         debug(table.outerHTML);
@@ -215,7 +227,7 @@
                             '<FORM id="fantasyURLForm">' + 
                             '<INPUT id="fantasyURLInput" TYPE="TEXT" size="45">' +
                             '<button id="fantasyURLbtn" TYPE="Button">Set URL</button> ' +
-                            '<button id="setPositionbtn" TYPE="Button">Lock</button> ' +
+                            '<button id="setPositionbtn" TYPE="Button"><IMG SRC="https://raw.githubusercontent.com/fbird17/GM_AddFantasyToMyYahoo/master/lock-icon.png" ALIGN="absmiddle"></button> ' +
                             '</FORM>' +
                             '</div></div>' +
                             '<div class="App-Chrome_v2">' +
@@ -242,7 +254,7 @@
       
           // Added Event listeners for SetURL and Lock buttons. Of course, the lock button should be unnecessary (sigh)
         var setURLbtn=document.getElementById("fantasyURLbtn");
-           setURLbtn.addEventListener("click", gmSetFantasyURLValue, false);
+        setURLbtn.addEventListener("click", gmSetFantasyURLValue, false);
         var setPositionBtn=document.getElementById("setPositionbtn");
         setPositionBtn.addEventListener("click", gmSetFantasyPosition, false);
         currentElement = document.getElementById(FANTASY_APPLET_ID);
