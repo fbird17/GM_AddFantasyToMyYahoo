@@ -1,18 +1,18 @@
 // ==UserScript==
-// @name				GM_AddFantasyToMyYahoo
-// @version				0.0.5
-// @namespace			https://github.com/fbird17
-// @description			Adds a Fantasy Baseball (and probably Football) link to the My Yahoo! homepage
-// @match      			https://my.yahoo.com*
-// @include    			https://my.yahoo.com*
-// @grant       		GM_getValue
-// @grant				GM_setValue
-// @grant				GM_xmlhttpRequest
-// @downloadURL     	https://raw.githubusercontent.com/fbird17/GM_AddFantasyToMyYahoo/master/GM_AddFantasyToMyYahoo.user.js
+// @name            GM_AddFantasyToMyYahoo
+// @version         0.0.5
+// @namespace       https://github.com/fbird17
+// @description     Adds a Fantasy Baseball (and probably Football) link to the My Yahoo! homepage
+// @match           https://my.yahoo.com*
+// @include         https://my.yahoo.com*
+// @grant           GM_getValue
+// @grant           GM_setValue
+// @grant           GM_xmlhttpRequest
+// @downloadURL     https://raw.githubusercontent.com/fbird17/GM_AddFantasyToMyYahoo/master/GM_AddFantasyToMyYahoo.user.js
 // ==/UserScript==
 
 //History
-//Version 0.0.2:  3/25/2014:  Initial release.
+//Version 0.0.5:  3/25/2014:  Initial release.
    
 // TODO:
 // 1. Gave up on integrating a settings button - kept crashing because Yahoo stores functions on its server.
@@ -21,16 +21,16 @@
 // 3. Would prefer to lock automatically instead of with button, but can't figure out what event to grab to do it, so I'm 
 //    stuck with that ridiculous LockButton (considered using a timer event, but why hose performance for a rare event)
 
-	var FANTASY_APPLET_GUID = "bf76f7";
-	var FANTASY_APPLET_ID = "applet-toolbar_" + FANTASY_APPLET_GUID;
+    var FANTASY_APPLET_GUID = "bf76f7";
+    var FANTASY_APPLET_ID = "applet-toolbar_" + FANTASY_APPLET_GUID;
 
-	function debug(msg)
-	{
-    	console.log(msg);
+    function debug(msg)
+    {
+        console.log(msg);
     }
 
-	function gmSetFantasyURLValue() 
-	{
+    function gmSetFantasyURLValue() 
+    {
         var val = document.getElementById("fantasyURLInput").value;
         
         debug("Setting value " + val);
@@ -38,23 +38,23 @@
         debug ("Value is now " + GM_getValue('fantasyURL'));
         
         GetFantasyPage();
-	}
+    }
     
     function getFirstChildId(parent) 
     {
         var children = parent.children;
-		var count = children.length;
-		for (var i = 0; i < count; i++) {
-  			if (children[i].id != "" && children[i].id != FANTASY_APPLET_ID) {
-    			break;
-  			}
+        var count = children.length;
+        for (var i = 0; i < count; i++) {
+              if (children[i].id != "" && children[i].id != FANTASY_APPLET_ID) {
+                break;
+              }
         }
         debug("getFirstChildId: " + i + " (" + children[i].id + ")");
-		return children[i];
+        return children[i];
     }
 
-	function gmSetFantasyPosition()
-	{
+    function gmSetFantasyPosition()
+    {
         var fantasyParentId = document.getElementById(FANTASY_APPLET_ID).parentNode.id;
         var fantasyNextSibling = document.getElementById(FANTASY_APPLET_ID).nextSibling;
         while (fantasyNextSibling != undefined) {
@@ -72,57 +72,57 @@
         fakeTimeout(function() { GM_setValue('fantasyParentId', fantasyParentId); });
         fakeTimeout(function() { GM_setValue('fantasyNextSiblingId', fantasyNextSiblingId); });
         debug ("Value is now " + GM_getValue('fantasyParentId') + " and " + GM_getValue('fantasyNextSiblingId'));   
-	}
+    }
 
-	function setRecursiveCallback(element, eventName, callback) 
-	{
+    function setRecursiveCallback(element, eventName, callback) 
+    {
         var i;
         element.addEventListener(eventName, callback, false);
         debug("Adding event " + eventName + " for " + element.tagName);
         for (i=0; i<element.children.length; i++) {
-        	setRecursiveCallback(element.children[i], eventName, callback);
+            setRecursiveCallback(element.children[i], eventName, callback);
         }
     }
 
     function fakeTimeout(callback) {
-  		// Register event listener
- 		 window.document.body.addEventListener("timeoutEvent", callback, false);
-  		// Generate and dispatch synthetic event
-  		var ev = document.createEvent("HTMLEvents");
-  		ev.initEvent("timeoutEvent", true, false);
-  		window.document.body.dispatchEvent(ev);
-	}
+          // Register event listener
+          window.document.body.addEventListener("timeoutEvent", callback, false);
+          // Generate and dispatch synthetic event
+          var ev = document.createEvent("HTMLEvents");
+          ev.initEvent("timeoutEvent", true, false);
+          window.document.body.dispatchEvent(ev);
+    }
     
-	function GetFantasyPage() {
-		var fantasyURL = GM_getValue('fantasyURL');
-   		       
-   		GM_xmlhttpRequest({
-       		method: "GET",
-       		url: fantasyURL,
-       		onerror: function(response) {
-           		createFBBBox(response, false, fantasyURL);
-       		},
-       		onload: function(response) {
-           		createFBBBox(response, true, fantasyURL);
-       		}
+    function GetFantasyPage() {
+        var fantasyURL = GM_getValue('fantasyURL');
+                  
+           GM_xmlhttpRequest({
+               method: "GET",
+               url: fantasyURL,
+               onerror: function(response) {
+                   createFBBBox(response, false, fantasyURL);
+               },
+               onload: function(response) {
+                   createFBBBox(response, true, fantasyURL);
+               }
         });
     }
-	//Function.prototype.bind = function( thisObject ) {
-  	//	var method = this;
-  	//	var oldargs = [].slice.call( arguments, 1 );
-  	//	return function () {
-    //		var newargs = [].slice.call( arguments );
-    //		return method.apply( thisObject, oldargs.concat( newargs ));
-  	//	};
-	//}
+    //Function.prototype.bind = function( thisObject ) {
+    //    var method = this;
+    //    var oldargs = [].slice.call( arguments, 1 );
+    //    return function () {
+    //    var newargs = [].slice.call( arguments );
+    //    return method.apply( thisObject, oldargs.concat( newargs ));
+    //};
+    //}
 
     function createFBBBox(response, validURL, fantasyURL)
-	{ 
+    { 
         var table, title;
         
         if (validURL) {
-    		var parser = new DOMParser();
-        	var doc = parser.parseFromString(response.responseText, "text/html");            
+            var parser = new DOMParser();
+            var doc = parser.parseFromString(response.responseText, "text/html");            
                         
             var baseURL = fantasyURL.substr(0, fantasyURL.search(/[^\/]\/(?!\/)/)+1);
             
@@ -149,21 +149,21 @@
            for (var i = 0; i < anchors.length; i++) {
                 if (anchors[i].innerText === "Match Up") { 
                     matchupLink = document.createElement('a');
-           			matchupLink.setAttribute('href',baseURL + anchors[2].getAttribute('href'));
-           			matchupLink.innerText = anchors[2].innerText;
+                       matchupLink.setAttribute('href',baseURL + anchors[2].getAttribute('href'));
+                       matchupLink.innerText = anchors[2].innerText;
                 } else if (anchors[i].innerText.search("StatTracker") > -1) {
                     statTrackerLink = document.createElement('a');
                     statTrackerLink.setAttribute('href',baseURL + anchors[3].getAttribute('href'));
-           			statTrackerLink.innerText = anchors[3].innerText;
-           			statTrackerLink.style.fontWeight = 'bold';
+                       statTrackerLink.innerText = anchors[3].innerText;
+                       statTrackerLink.style.fontWeight = 'bold';
                 }
            }
            
            table = document.createElement('table');
            table.id = 'MyYahooFantasyTableId';
-    	   var tr = document.createElement('tr');
+           var tr = document.createElement('tr');
            tr.appendChild( document.createElement('td') );
-    	   tr.appendChild( document.createElement('td') );
+           tr.appendChild( document.createElement('td') );
            tr.appendChild( document.createElement('td') );
            tr.cells[0].appendChild( firstTeam );
            tr.cells[1].appendChild( document.createTextNode(firstTeamScore) );
@@ -173,17 +173,17 @@
            table.appendChild(tr);
            tr = document.createElement('tr');
            tr.appendChild( document.createElement('td') );
-    	   tr.appendChild( document.createElement('td') );
+           tr.appendChild( document.createElement('td') );
            tr.cells[0].appendChild( secondTeam );
            tr.cells[1].appendChild( document.createTextNode(secondTeamScore) );
-		   table.appendChild(tr);
+           table.appendChild(tr);
            tr = document.createElement('tr');
            tr.appendChild( document.createElement('td') );
-    	   tr.cells[0].appendChild( statTrackerLink );
-		   table.appendChild(tr);
+           tr.cells[0].appendChild( statTrackerLink );
+           table.appendChild(tr);
         }
         else {
-         	title = "MyYahoo - Add FBB Link";
+             title = "MyYahoo - Add FBB Link";
             table = document.createElement('table');
         }
         debug(table.outerHTML);
@@ -192,7 +192,7 @@
         var fantasyParentId = GM_getValue('fantasyParentId', "applet-container-content_p1-c1");
         var fantasyNextSiblingId, firstApplet;
         try {
-        	firstApplet = getFirstChildId(document.getElementById(fantasyParentId));
+            firstApplet = getFirstChildId(document.getElementById(fantasyParentId));
             fantasyNextSiblingId = GM_getValue('fantasyNextSiblingId', firstApplet.id);
             debug ("1st try: fantasyNextSiblingId is " + fantasyNextSiblingId + " and fantasyParentId is " + fantasyParentId);
             if (fantasyNextSiblingId != undefined && fantasyNextSiblingId != "undefined" && fantasyNextSiblingId != "") {
@@ -212,49 +212,54 @@
         // 1. What if firstApplet is weird?
         // 2. I would need to pull out a bunch of specific div's, like the settings button, so it didn't really buy me much in terms of abstracting the current HTML
         var FooterHTML = '<div class="App-Ft Row"><div data-region="footer" class="Fl-start Pos-r Z-1"><div class="js-applet-view-container-footer">' + 
-                			'<FORM id="fantasyURLForm">' + 
-        					'<INPUT id="fantasyURLInput" TYPE="TEXT" size="45">' +
+                            '<FORM id="fantasyURLForm">' + 
+                            '<INPUT id="fantasyURLInput" TYPE="TEXT" size="45">' +
                             '<button id="fantasyURLbtn" TYPE="Button">Set URL</button> ' +
-            				'<button id="setPositionbtn" TYPE="Button">Lock</button> ' +
-            				'</FORM>' +
-            				'</div></div>' +
+                            '<button id="setPositionbtn" TYPE="Button">Lock</button> ' +
+                            '</FORM>' +
+                            '</div></div>' +
                             '<div class="App-Chrome_v2">' +
-          	            	'</div>' +
-        					'</div>';
+                              '</div>' +
+                            '</div>';
         
         // Remove it if it already exists
         var currentElement = document.getElementById(FANTASY_APPLET_ID);
         if (currentElement) {
-           	currentElement.parentNode.removeChild(currentElement);
+               currentElement.parentNode.removeChild(currentElement);
         } 
         
         debug("Position: " + fantasyParentId + " and " + fantasyNextSiblingId);
         var myParent = document.getElementById(fantasyParentId);
         var beforeElement = document.getElementById(fantasyNextSiblingId);
         
-		var newNode = document.createElement('div');
+        var newNode = document.createElement('div');
         myParent.insertBefore(newNode, beforeElement);
         newNode.outerHTML = '<div id="' + FANTASY_APPLET_ID + '" class=" App_v2  M-0 js-applet myyrss Zoom-1  Mt-20" data-applet-guid="' + FANTASY_APPLET_GUID + '">' +
-            	'<div class="BrandBar" style="background-color:#6e329d;"><div class="Inner Fl-end"></div></div>' +
-            	'<div class="App-Hd" data-region="header"><div class="js-applet-view-container-header"><div class="GridSpread">' +
-            	'<h2 class="Grid-U App-Title"><a href="' + fantasyURL + '">' + title + '</a></h2>' + 
+                '<div class="BrandBar" style="background-color:#6e329d;"><div class="Inner Fl-end"></div></div>' +
+                '<div class="App-Hd" data-region="header"><div class="js-applet-view-container-header"><div class="GridSpread">' +
+                '<h2 class="Grid-U App-Title"><a href="' + fantasyURL + '">' + title + '</a></h2>' + 
                 '</div></div></div>' + table.outerHTML + FooterHTML + '</div>';      
       
-  		// Added Event listerners for SetURL and Lock buttons. Of course, the lock button should be unnecessary (sigh)
-		var setURLbtn=document.getElementById("fantasyURLbtn");
-       	setURLbtn.addEventListener("click", gmSetFantasyURLValue, false);
+          // Added Event listeners for SetURL and Lock buttons. Of course, the lock button should be unnecessary (sigh)
+        var setURLbtn=document.getElementById("fantasyURLbtn");
+           setURLbtn.addEventListener("click", gmSetFantasyURLValue, false);
         var setPositionBtn=document.getElementById("setPositionbtn");
         setPositionBtn.addEventListener("click", gmSetFantasyPosition, false);
         currentElement = document.getElementById(FANTASY_APPLET_ID);
         //currentElement.addEventListener("mouseup", gmSetFantasyPosition, false);
         //setRecursiveCallback(currentElement, "focusout", gmSetFantasyPosition);
-        //setRecursiveCallback(currentElement, "drop", gmSetFantasyPosition);
-                
+        //setRecursiveCallback(currentElement, "drop", gmSetFantasyPosition);      
+        
         document.getElementById("fantasyURLInput").defaultValue = fantasyURL;
+        
+        // Save position (would be unnecessary with some kind of move/drop event)
+        gmSetFantasyPosition();
+        
         debug("Fantasy added " + currentElement.id + " as " + fantasyURL);
-	}
+        
+    }
 
-	debug("My Yahoo - Add FBB Link");
-   	GetFantasyPage();
+    debug("My Yahoo - Add FBB Link");
+       GetFantasyPage();
   
 // ----------------------------------------------------------------------------------------------
