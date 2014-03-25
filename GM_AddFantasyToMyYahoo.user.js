@@ -183,7 +183,7 @@
             tr.cells[1].appendChild( document.createTextNode(firstTeamScore) );
             tr.cells[2].appendChild( matchupLink );
             tr.cells[2].setAttribute('align', 'right');
-            tr.cells[2].setAttribute('width', '60px');
+            tr.cells[2].setAttribute('width', '50px');
             table.appendChild(tr);
             tr = document.createElement('tr');
             tr.appendChild( document.createElement('td') );
