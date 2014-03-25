@@ -45,7 +45,7 @@
         var children = parent.children;
 		var count = children.length;
 		for (var i = 0; i < count; i++) {
-  			if (children[i].id != "") {
+  			if (children[i].id != "" && children[i].id != FANTASY_APPLET_ID) {
     			break;
   			}
         }
