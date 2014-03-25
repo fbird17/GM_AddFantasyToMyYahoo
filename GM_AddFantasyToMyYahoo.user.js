@@ -15,10 +15,11 @@
 //Version 0.0.5:  3/25/2014:  Initial release.
    
 // TODO:
-// 1. Gave up on integrating a settings button - kept crashing because Yahoo stores functions on its server.
-// 2. Caveat: Only supports one fantasy team at a time, and only one instance is allowed (sorry). Could add a '+' button
+// 1. Should I make lock-picture.png a resource instead of loading it directly?
+// 2. Gave up on integrating a settings button - kept crashing because Yahoo stores functions on its server.
+// 3. Caveat: Only supports one fantasy team at a time, and only one instance is allowed (sorry). Could add a '+' button
 //    for this and make an array of added elements.
-// 3. Would prefer to lock automatically instead of with button, but can't figure out what event to grab to do it, so I'm 
+// 4. Would prefer to lock automatically instead of with button, but can't figure out what event to grab to do it, so I'm 
 //    stuck with that ridiculous LockButton (considered using a timer event, but why hose performance for a rare event)
 
     var FANTASY_APPLET_GUID = "bf76f7";
@@ -165,7 +166,8 @@
                     if (statTrackerAnchors.length > 0) {
                         statTrackerLink = document.createElement('a');
                         statTrackerLink.setAttribute('href',baseURL + statTrackerAnchors[0].getAttribute('href'));
-                        statTrackerLink.innerText = "StatTracker";
+                        statTrackerLink.setAttribute('target',statTrackerAnchors[0].getAttribute('target'));
+                        statTrackerLink.innerText = "Watch Live with StatTracker";
                         statTrackerLink.style.fontWeight = 'bold';
                     }
                 }
