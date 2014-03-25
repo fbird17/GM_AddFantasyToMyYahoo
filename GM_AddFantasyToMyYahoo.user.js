@@ -159,7 +159,7 @@
                 }
             }
             if (statTrackerLink.innerText === "StatTracker not available") {
-                var statTrackerClasses = document.getElementsByClassName('Navitem Navitem-main statracker has-live-games');
+                var statTrackerClasses = doc.getElementsByClassName('Navitem Navitem-main statracker has-live-games');
                 if (statTrackerClasses.length > 0) {
                     var statTrackerAnchors = statTrackerClasses[0].getElementsByTagName('a');
                     if (statTrackerAnchors.length > 0) {
