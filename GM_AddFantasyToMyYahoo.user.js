@@ -227,7 +227,7 @@
                             '<FORM id="fantasyURLForm">' + 
                             '<INPUT id="fantasyURLInput" TYPE="TEXT" size="45">' +
                             '<button id="fantasyURLbtn" TYPE="Button">Set URL</button> ' +
-                            '<button id="setPositionbtn" TYPE="Button"><IMG SRC="https://raw.githubusercontent.com/fbird17/GM_AddFantasyToMyYahoo/master/lock-icon.png" ALIGN="absmiddle"></button> ' +
+                            '<button id="setPositionbtn" TYPE="Button"><IMG SRC="https://raw.githubusercontent.com/fbird17/GM_AddFantasyToMyYahoo/master/lock-picture.png" ALIGN="absmiddle"></button> ' +
                             '</FORM>' +
                             '</div></div>' +
                             '<div class="App-Chrome_v2">' +
