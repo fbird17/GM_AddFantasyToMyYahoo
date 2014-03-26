@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            GM_AddFantasyToMyYahoo
-// @version         0.0.5
+// @version         0.0.6
 // @namespace       https://github.com/fbird17
 // @description     Adds a Fantasy Baseball (and probably Football) link to the My Yahoo! homepage
 // @match           https://my.yahoo.com*
@@ -12,15 +12,14 @@
 // ==/UserScript==
 
 //History
-//Version 0.0.5:  3/25/2014:  Initial release.
+//Version 0.0.5:  3/25/2014: Initial release.
+//Version 0.0.6:  3/26/2014: Got rid of Lock button and replaced with mouseup event
    
 // TODO:
-// 1. Should I make lock-picture.png a resource instead of loading it directly?
-// 2. Gave up on integrating a settings button - kept crashing because Yahoo stores functions on its server.
-// 3. Caveat: Only supports one fantasy team at a time, and only one instance is allowed (sorry). Could add a '+' button
+// 1. Gave up on integrating a settings button - kept crashing because Yahoo stores functions on its server.
+// 2. Caveat: Only supports one fantasy team at a time, and only one instance is allowed (sorry). Could add a '+' button
 //    for this and make an array of added elements.
-// 4. Would prefer to lock automatically instead of with button, but can't figure out what event to grab to do it, so I'm 
-//    stuck with that ridiculous LockButton (considered using a timer event, but why hose performance for a rare event)
+//
 
     var FANTASY_APPLET_GUID = "bf76f7";
     var FANTASY_APPLET_ID = "applet-toolbar_" + FANTASY_APPLET_GUID;
@@ -229,7 +228,6 @@
                             '<FORM id="fantasyURLForm">' + 
                             '<INPUT id="fantasyURLInput" TYPE="TEXT" size="45">' +
                             '<button id="fantasyURLbtn" TYPE="Button">Set URL</button> ' +
-                            '<button id="setPositionbtn" TYPE="Button"><IMG SRC="https://raw.githubusercontent.com/fbird17/GM_AddFantasyToMyYahoo/master/lock-picture.png" ALIGN="absmiddle"></button> ' +
                             '</FORM>' +
                             '</div></div>' +
                             '<div class="App-Chrome_v2">' +
@@ -254,20 +252,13 @@
                 '<h2 class="Grid-U App-Title"><a href="' + fantasyURL + '">' + title + '</a></h2>' + 
                 '</div></div></div>' + table.outerHTML + FooterHTML + '</div>';      
       
-          // Added Event listeners for SetURL and Lock buttons. Of course, the lock button should be unnecessary (sigh)
+          // Added Event listeners for SetURL button and mouseup (to check if our applet has moved)
         var setURLbtn=document.getElementById("fantasyURLbtn");
         setURLbtn.addEventListener("click", gmSetFantasyURLValue, false);
-        var setPositionBtn=document.getElementById("setPositionbtn");
-        setPositionBtn.addEventListener("click", gmSetFantasyPosition, false);
+        document.addEventListener("mouseup", gmSetFantasyPosition, false);
         currentElement = document.getElementById(FANTASY_APPLET_ID);
-        //currentElement.addEventListener("mouseup", gmSetFantasyPosition, false);
-        //setRecursiveCallback(currentElement, "focusout", gmSetFantasyPosition);
-        //setRecursiveCallback(currentElement, "drop", gmSetFantasyPosition);      
         
         document.getElementById("fantasyURLInput").defaultValue = fantasyURL;
-        
-        // Save position (would be unnecessary with some kind of move/drop event)
-        gmSetFantasyPosition();
         
         debug("Fantasy added " + currentElement.id + " as " + fantasyURL);
         
