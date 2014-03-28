@@ -3,10 +3,10 @@
 // @version         0.0.7
 // @namespace       https://github.com/fbird17
 // @description     Adds a Fantasy Baseball (and probably Football) link to the My Yahoo! homepage
-// @match           https://my.yahoo.com
-// @match           https://my.yahoo.com/*
-// @include         https://my.yahoo.com
-// @include         https://my.yahoo.com/*
+// @match           *://my.yahoo.com
+// @match           *://my.yahoo.com/*
+// @include         *://my.yahoo.com
+// @include         *://my.yahoo.com/*
 // @grant           GM_getValue
 // @grant           GM_setValue
 // @grant           GM_xmlhttpRequest
