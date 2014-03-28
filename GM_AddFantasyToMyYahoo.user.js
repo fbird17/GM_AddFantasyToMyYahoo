@@ -137,7 +137,6 @@
             debug(doc.getElementById('scoreboard-fantasy').getElementsByClassName('yfa-matchup')[0].className);
             var anchors = MatchupList.getElementsByTagName('a');
             debug(anchors[0].outerHTML);
-            debug(anchors[0].outerText);
             debug(anchors[0].textContent);
             var firstTeam = document.createElement('a');
             firstTeam.setAttribute('href',baseURL + anchors[0].getAttribute('href'));
