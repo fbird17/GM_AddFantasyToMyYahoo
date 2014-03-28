@@ -122,7 +122,7 @@
     { 
         var table, title;
         
-        if (validURL) {
+        if (validURL && fantasyURL != undefined) {
             var parser = new DOMParser();
             var doc = parser.parseFromString(response.responseText, "text/html");            
                         
