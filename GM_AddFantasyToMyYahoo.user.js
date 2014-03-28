@@ -133,7 +133,12 @@
             title = title.split('- ')[1];
             
             var MatchupList = doc.getElementById('scoreboard-fantasy').getElementsByClassName('yfa-matchup')[0];       
+            debug(doc.getElementById('scoreboard-fantasy').id);
+            debug(doc.getElementById('scoreboard-fantasy').getElementsByClassName('yfa-matchup')[0].className);
             var anchors = MatchupList.getElementsByTagName('a');
+            debug(anchors[0].outerHTML);
+            debug(anchors[0].outerText);
+            debug(anchors[0].innerText);
             var firstTeam = document.createElement('a');
             firstTeam.setAttribute('href',baseURL + anchors[0].getAttribute('href'));
             firstTeam.innerText = anchors[0].innerText;
