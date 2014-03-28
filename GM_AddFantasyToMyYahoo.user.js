@@ -138,36 +138,36 @@
             var anchors = MatchupList.getElementsByTagName('a');
             debug(anchors[0].outerHTML);
             debug(anchors[0].outerText);
-            debug(anchors[0].innerText);
+            debug(anchors[0].textContent);
             var firstTeam = document.createElement('a');
             firstTeam.setAttribute('href',baseURL + anchors[0].getAttribute('href'));
-            firstTeam.innerText = anchors[0].innerText;
-            var firstTeamScore = MatchupList.getElementsByTagName('span')[0].innerText;
+            firstTeam.textContent = anchors[0].textContent;
+            var firstTeamScore = MatchupList.getElementsByTagName('span')[0].textContent;
             var secondTeam = document.createElement('a');
             secondTeam.setAttribute('href',baseURL + anchors[1].getAttribute('href'));
-            secondTeam.innerText = anchors[1].innerText;
-            var secondTeamScore = MatchupList.getElementsByTagName('span')[1].innerText;
+            secondTeam.textContent = anchors[1].textContent;
+            var secondTeamScore = MatchupList.getElementsByTagName('span')[1].textContent;
             
             var matchupLink = document.createElement('span');
-            matchupLink.innerText = "Match Up link not available";
+            matchupLink.textContent = "Match Up link not available";
             var statTrackerLink = document.createElement('span');
-            statTrackerLink.innerText = "StatTracker not available";
+            statTrackerLink.textContent = "StatTracker not available";
             
             for (var i = 0; i < anchors.length; i++) {
-                if (anchors[i].innerText != undefined) {
-                    if (anchors[i].innerText === "Match Up") { 
+                if (anchors[i].textContent != undefined) {
+                    if (anchors[i].textContent === "Match Up") { 
                         matchupLink = document.createElement('a');
                         matchupLink.setAttribute('href',baseURL + anchors[i].getAttribute('href'));
-                        matchupLink.innerText = anchors[i].innerText;
-                    } else if (anchors[i].innerText.search("StatTracker") > -1) {
+                        matchupLink.textContent = anchors[i].textContent;
+                    } else if (anchors[i].textContent.search("StatTracker") > -1) {
                         statTrackerLink = document.createElement('a');
                         statTrackerLink.setAttribute('href',baseURL + anchors[i].getAttribute('href'));
-                        statTrackerLink.innerText = anchors[i].innerText;
+                        statTrackerLink.textContent = anchors[i].textContent;
                         statTrackerLink.style.fontWeight = 'bold';
                     }
                 }
             }
-            if (statTrackerLink.innerText === "StatTracker not available") {
+            if (statTrackerLink.textContent === "StatTracker not available") {
                 var statTrackerClasses = doc.getElementsByClassName('Navitem Navitem-main statracker has-live-games');
                 if (statTrackerClasses.length > 0) {
                     var statTrackerAnchors = statTrackerClasses[0].getElementsByTagName('a');
@@ -175,7 +175,7 @@
                         statTrackerLink = document.createElement('a');
                         statTrackerLink.setAttribute('href',baseURL + statTrackerAnchors[0].getAttribute('href'));
                         statTrackerLink.setAttribute('target',statTrackerAnchors[0].getAttribute('target'));
-                        statTrackerLink.innerText = "Watch Live with StatTracker";
+                        statTrackerLink.textContent = "Watch Live with StatTracker";
                         statTrackerLink.style.fontWeight = 'bold';
                     }
                 }
