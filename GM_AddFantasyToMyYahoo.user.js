@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name            GM_AddFantasyToMyYahoo
-// @version         0.0.6
+// @version         0.0.7
 // @namespace       https://github.com/fbird17
 // @description     Adds a Fantasy Baseball (and probably Football) link to the My Yahoo! homepage
 // @match           https://my.yahoo.com
 // @match           https://my.yahoo.com/*
-// @include         https://my.yahoo.com*
+// @include         https://my.yahoo.com
 // @include         https://my.yahoo.com/*
 // @grant           GM_getValue
 // @grant           GM_setValue
@@ -14,8 +14,9 @@
 // ==/UserScript==
 
 //History
-//Version 0.0.5:  3/25/2014: Initial release.
-//Version 0.0.6:  3/26/2014: Got rid of Lock button and replaced with mouseup event
+//Version 0.0.5: 3/25/2014: Initial release.
+//Version 0.0.6: 3/26/2014: Got rid of Lock button and replaced with mouseup event
+//Version 0.0.7: 3/28/2014: Added Firefox support
    
 // TODO:
 // 1. Gave up on integrating a settings button - kept crashing because Yahoo stores functions on its server.
@@ -133,11 +134,7 @@
             title = title.split('- ')[1];
             
             var MatchupList = doc.getElementById('scoreboard-fantasy').getElementsByClassName('yfa-matchup')[0];       
-            debug(doc.getElementById('scoreboard-fantasy').id);
-            debug(doc.getElementById('scoreboard-fantasy').getElementsByClassName('yfa-matchup')[0].className);
             var anchors = MatchupList.getElementsByTagName('a');
-            debug(anchors[0].outerHTML);
-            debug(anchors[0].textContent);
             var firstTeam = document.createElement('a');
             firstTeam.setAttribute('href',baseURL + anchors[0].getAttribute('href'));
             firstTeam.textContent = anchors[0].textContent;
@@ -245,7 +242,7 @@
         // Remove it if it already exists
         var currentElement = document.getElementById(FANTASY_APPLET_ID);
         if (currentElement) {
-               currentElement.parentNode.removeChild(currentElement);
+            currentElement.parentNode.removeChild(currentElement);
         } 
         
         debug("Position: " + fantasyParentId + " and " + fantasyNextSiblingId);
@@ -273,6 +270,6 @@
     }
 
     debug("My Yahoo - Add FBB Link");
-       GetFantasyPage();
+    GetFantasyPage();
   
 // ----------------------------------------------------------------------------------------------
