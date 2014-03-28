@@ -149,15 +149,17 @@
             statTrackerLink.innerText = "StatTracker not available";
             
             for (var i = 0; i < anchors.length; i++) {
-                if (anchors[i].innerText === "Match Up") { 
-                    matchupLink = document.createElement('a');
-                    matchupLink.setAttribute('href',baseURL + anchors[i].getAttribute('href'));
-                    matchupLink.innerText = anchors[i].innerText;
-                } else if (anchors[i].innerText.search("StatTracker") > -1) {
-                    statTrackerLink = document.createElement('a');
-                    statTrackerLink.setAttribute('href',baseURL + anchors[i].getAttribute('href'));
-                    statTrackerLink.innerText = anchors[i].innerText;
-                    statTrackerLink.style.fontWeight = 'bold';
+                if (anchors[i].innerText != undefined) {
+                    if (anchors[i].innerText === "Match Up") { 
+                        matchupLink = document.createElement('a');
+                        matchupLink.setAttribute('href',baseURL + anchors[i].getAttribute('href'));
+                        matchupLink.innerText = anchors[i].innerText;
+                    } else if (anchors[i].innerText.search("StatTracker") > -1) {
+                        statTrackerLink = document.createElement('a');
+                        statTrackerLink.setAttribute('href',baseURL + anchors[i].getAttribute('href'));
+                        statTrackerLink.innerText = anchors[i].innerText;
+                        statTrackerLink.style.fontWeight = 'bold';
+                    }
                 }
             }
             if (statTrackerLink.innerText === "StatTracker not available") {
