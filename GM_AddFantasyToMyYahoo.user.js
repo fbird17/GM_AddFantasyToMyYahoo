@@ -165,6 +165,9 @@
             }
             if (statTrackerLink.textContent === "StatTracker not available") {
                 var statTrackerClasses = doc.getElementsByClassName('stattracker');
+                if (statTrackerClasses.length < 1) {
+                    statTrackerClasses = doc.getElementsByClassName('statracker');  // Thanks Yahoo
+                }
                 if (statTrackerClasses.length > 0) {
                     var statTrackerAnchors = statTrackerClasses[0].getElementsByTagName('a');
                     if (statTrackerAnchors.length > 0) {
