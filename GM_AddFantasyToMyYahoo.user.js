@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            GM_AddFantasyToMyYahoo
-// @version         0.0.7
+// @version         0.0.
 // @namespace       https://github.com/fbird17
 // @description     Adds a Fantasy Baseball (and probably Football) link to the My Yahoo! homepage
 // @match           *://my.yahoo.com
@@ -17,11 +17,12 @@
 //Version 0.0.5: 3/25/2014: Initial release.
 //Version 0.0.6: 3/26/2014: Got rid of Lock button and replaced with mouseup event
 //Version 0.0.7: 3/28/2014: Added Firefox support
+//Version 0.0.8: 4/02/2014: Got rid of SetURL and just look at leagues directly. More fragile, but more user friendly.
    
 // TODO:
 // 1. Gave up on integrating a settings button - kept crashing because Yahoo stores functions on its server.
-// 2. Caveat: Only supports one fantasy team at a time, and only one instance is allowed (sorry). Could add a '+' button
-//    for this and make an array of added elements.
+// 2. Make StatTracker launch in separate window (and verify its the same window as from Yahoo Sports)
+// 3. Can I update scores automatically?
 //
 
     var FANTASY_APPLET_GUID = "bf76f7";
@@ -29,20 +30,9 @@
 
     function debug(msg)
     {
-        console.log(msg);
+        console.log('GM_AddFantasyToMyYahoo: ' + msg);
     }
-
-    function gmSetFantasyURLValue() 
-    {
-        var val = document.getElementById("fantasyURLInput").value;
-        
-        debug("Setting value " + val);
-        fakeTimeout(function() { GM_setValue('fantasyURL', val); });
-        debug ("Value is now " + GM_getValue('fantasyURL'));
-        
-        GetFantasyPage();
-    }
-    
+   
     function getFirstChildId(parent) 
     {
         var children = parent.children;
@@ -96,183 +86,175 @@
           window.document.body.dispatchEvent(ev);
     }
     
-    function GetFantasyPage() {
-        var fantasyURL = GM_getValue('fantasyURL');
-                  
-           GM_xmlhttpRequest({
-               method: "GET",
-               url: fantasyURL,
-               onerror: function(response) {
-                   createFBBBox(response, false, fantasyURL);
-               },
-               onload: function(response) {
-                   createFBBBox(response, true, fantasyURL);
-               }
-        });
-    }
-    //Function.prototype.bind = function( thisObject ) {
-    //    var method = this;
-    //    var oldargs = [].slice.call( arguments, 1 );
-    //    return function () {
-    //    var newargs = [].slice.call( arguments );
-    //    return method.apply( thisObject, oldargs.concat( newargs ));
-    //};
-    //}
 
-    function createFBBBox(response, validURL, fantasyURL)
-    { 
-        var table, title;
+    debug("My Yahoo - Add FBB Link");
+    
+    createFantasyDiv();
+      
+// ----------------------------------------------------------------------------------------------
+function createFantasyDiv() 
+{
+    // This is pretty weak error handling. Basically if anything has changed about the page, we give up and put it back at the top.
+    var fantasyParentId = GM_getValue('fantasyParentId', "applet-container-content_p1-c1");
+    var fantasyNextSiblingId, firstApplet;
+    try {
+        firstApplet = getFirstChildId(document.getElementById(fantasyParentId));
+        fantasyNextSiblingId = GM_getValue('fantasyNextSiblingId', firstApplet.id);
+        debug ("1st try: fantasyNextSiblingId is " + fantasyNextSiblingId + " and fantasyParentId is " + fantasyParentId);
+        if (fantasyNextSiblingId != undefined && fantasyNextSiblingId != "undefined" && fantasyNextSiblingId != "") {
+            if (document.getElementById(fantasyNextSiblingId).parentElement.id != fantasyParentId) {
+                debug ("No parent match - throwing fantasyNextSiblingId");
+                throw ("BeforeElement and Parent don't match. Giving up and resetting.");
+            }
+        }
+    } catch(e) {
+        fantasyParentId = "applet-container-content_p1-c1";
+        firstApplet = getFirstChildId(document.getElementById(fantasyParentId));
+        fantasyNextSiblingId = firstApplet.id;
+    }
+    debug ("final try: fantasyNextSiblingId is " + fantasyNextSiblingId + " and fantasyParentId is " + fantasyParentId);
         
-        if (validURL && fantasyURL != undefined) {
-            var parser = new DOMParser();
-            var doc = parser.parseFromString(response.responseText, "text/html");            
-                        
-            var baseURL = fantasyURL.substr(0, fantasyURL.search(/[^\/]\/(?!\/)/)+1);
-            
-            // here we go
-            title = doc.title;
-            title = title.split('- ')[1];
-            
-            var MatchupList = doc.getElementById('scoreboard-fantasy').getElementsByClassName('yfa-matchup')[0];       
-            var anchors = MatchupList.getElementsByTagName('a');
-            var firstTeam = document.createElement('a');
-            firstTeam.setAttribute('href',baseURL + anchors[0].getAttribute('href'));
-            firstTeam.textContent = anchors[0].textContent;
-            var firstTeamScore = MatchupList.getElementsByTagName('span')[0].textContent;
-            var secondTeam = document.createElement('a');
-            secondTeam.setAttribute('href',baseURL + anchors[1].getAttribute('href'));
-            secondTeam.textContent = anchors[1].textContent;
-            var secondTeamScore = MatchupList.getElementsByTagName('span')[1].textContent;
-            
-            var matchupLink = document.createElement('span');
-            matchupLink.textContent = "Match Up link not available";
-            var statTrackerLink = document.createElement('span');
-            statTrackerLink.textContent = "StatTracker not available";
-            
-            for (var i = 0; i < anchors.length; i++) {
-                if (anchors[i].textContent != undefined) {
-                    if (anchors[i].textContent === "Match Up") { 
-                        matchupLink = document.createElement('a');
-                        matchupLink.setAttribute('href',baseURL + anchors[i].getAttribute('href'));
-                        matchupLink.textContent = anchors[i].textContent;
-                    } else if (anchors[i].textContent.search("StatTracker") > -1) {
-                        statTrackerLink = document.createElement('a');
-                        statTrackerLink.setAttribute('href',baseURL + anchors[i].getAttribute('href'));
-                        statTrackerLink.textContent = anchors[i].textContent;
-                        statTrackerLink.style.fontWeight = 'bold';
-                    }
-                }
-            }
-            if (statTrackerLink.textContent === "StatTracker not available") {
-                var statTrackerClasses = doc.getElementsByClassName('stattracker');
-                if (statTrackerClasses.length < 1) {
-                    statTrackerClasses = doc.getElementsByClassName('statracker');  // Thanks Yahoo
-                }
-                if (statTrackerClasses.length > 0) {
-                    var statTrackerAnchors = statTrackerClasses[0].getElementsByTagName('a');
-                    if (statTrackerAnchors.length > 0) {
-                        statTrackerLink = document.createElement('a');
-                        statTrackerLink.setAttribute('href',baseURL + statTrackerAnchors[0].getAttribute('href'));
-                        statTrackerLink.setAttribute('target',statTrackerAnchors[0].getAttribute('target'));
-                        statTrackerLink.textContent = "Watch Live with StatTracker";
-                        statTrackerLink.style.fontWeight = 'bold';
-                    }
-                }
-            }
-            
-            table = document.createElement('table');
-            table.id = 'MyYahooFantasyTableId';
-            var tr = document.createElement('tr');
-            tr.appendChild( document.createElement('td') );
-            tr.appendChild( document.createElement('td') );
-            tr.appendChild( document.createElement('td') );
-            tr.cells[0].appendChild( firstTeam );
-            tr.cells[1].appendChild( document.createTextNode(firstTeamScore) );
-            tr.cells[2].appendChild( matchupLink );
-            tr.cells[2].setAttribute('align', 'right');
-            tr.cells[2].setAttribute('width', '50px');
-            table.appendChild(tr);
-            tr = document.createElement('tr');
-            tr.appendChild( document.createElement('td') );
-            tr.appendChild( document.createElement('td') );
-            tr.cells[0].appendChild( secondTeam );
-            tr.cells[1].appendChild( document.createTextNode(secondTeamScore) );
-            table.appendChild(tr);
-            tr = document.createElement('tr');
-            tr.appendChild( document.createElement('td') );
-            tr.cells[0].appendChild( statTrackerLink );
-            table.appendChild(tr);
-        }
-        else {
-            title = "MyYahoo - Add FBB Link";
-            table = document.createElement('table');
-        }
-        debug(table.outerHTML);
-            
-        // This is pretty weak error handling. Basically if anything has changed about the page, we give up and put it back at the top.
-        var fantasyParentId = GM_getValue('fantasyParentId', "applet-container-content_p1-c1");
-        var fantasyNextSiblingId, firstApplet;
-        try {
-            firstApplet = getFirstChildId(document.getElementById(fantasyParentId));
-            fantasyNextSiblingId = GM_getValue('fantasyNextSiblingId', firstApplet.id);
-            debug ("1st try: fantasyNextSiblingId is " + fantasyNextSiblingId + " and fantasyParentId is " + fantasyParentId);
-            if (fantasyNextSiblingId != undefined && fantasyNextSiblingId != "undefined" && fantasyNextSiblingId != "") {
-                if (document.getElementById(fantasyNextSiblingId).parentElement.id != fantasyParentId) {
-                    debug ("No parent match - throwing fantasyNextSiblingIdiblingId");
-                    throw ("BeforeElement and Parent don't match. Giving up and resetting.");
-                }
-            }
-        } catch(e) {
-            fantasyParentId = "applet-container-content_p1-c1";
-            firstApplet = getFirstChildId(document.getElementById(fantasyParentId));
-            fantasyNextSiblingId = firstApplet.id;
-        }
-        debug ("final try: fantasyNextSiblingId is " + fantasyNextSiblingId + " and fantasyParentId is " + fantasyParentId);
-        
-        // I considered cloning firstApplet for this, but there were a few problems with that:
-        // 1. What if firstApplet is weird?
-        // 2. I would need to pull out a bunch of specific div's, like the settings button, so it didn't really buy me much in terms of abstracting the current HTML
-        var FooterHTML = '<div class="App-Ft Row"><div data-region="footer" class="Fl-start Pos-r Z-1"><div class="js-applet-view-container-footer">' + 
-                            '<FORM id="fantasyURLForm">' + 
-                            '<INPUT id="fantasyURLInput" TYPE="TEXT" size="45">' +
-                            '<button id="fantasyURLbtn" TYPE="Button">Set URL</button> ' +
-                            '</FORM>' +
+    // I considered cloning firstApplet for this, but there were a few problems with that:
+    // 1. What if firstApplet is weird?
+    // 2. I would need to pull out a bunch of specific div's, like the settings button, so it didn't really buy me much in terms of abstracting the current HTML
+    var FooterHTML = '<div class="App-Ft Row"><div data-region="footer" class="Fl-start Pos-r Z-1"><div class="js-applet-view-container-footer">' + 
                             '</div></div>' +
                             '<div class="App-Chrome_v2">' +
                               '</div>' +
                             '</div>';
         
-        // Remove it if it already exists
+        // Replace element if it already exists
         var currentElement = document.getElementById(FANTASY_APPLET_ID);
-        if (currentElement) {
-            currentElement.parentNode.removeChild(currentElement);
-        } 
+        if (currentElement === null) {
+                    
+            debug("Position: " + fantasyParentId + " and " + fantasyNextSiblingId);
+            var myParent = document.getElementById(fantasyParentId);
+            var beforeElement = document.getElementById(fantasyNextSiblingId);
         
-        debug("Position: " + fantasyParentId + " and " + fantasyNextSiblingId);
-        var myParent = document.getElementById(fantasyParentId);
-        var beforeElement = document.getElementById(fantasyNextSiblingId);
-        
-        var newNode = document.createElement('div');
-        myParent.insertBefore(newNode, beforeElement);
-        newNode.outerHTML = '<div id="' + FANTASY_APPLET_ID + '" class=" App_v2  M-0 js-applet myyrss Zoom-1  Mt-20" data-applet-guid="' + FANTASY_APPLET_GUID + '">' +
+            var newNode = document.createElement('div');
+            myParent.insertBefore(newNode, beforeElement);
+            newNode.outerHTML = '<div id="' + FANTASY_APPLET_ID + '" class=" App_v2  M-0 js-applet myyrss Zoom-1  Mt-20" data-applet-guid="' + FANTASY_APPLET_GUID + '">' +
                 '<div class="BrandBar" style="background-color:#6e329d;"><div class="Inner Fl-end"></div></div>' +
                 '<div class="App-Hd" data-region="header"><div class="js-applet-view-container-header"><div class="GridSpread">' +
-                '<h2 class="Grid-U App-Title"><a href="' + fantasyURL + '">' + title + '</a></h2>' + 
-                '</div></div></div>' + table.outerHTML + FooterHTML + '</div>';      
+                '<h2 class="Grid-U App-Title"><a href="https://github.com/fbird17/GM_AddFantasyToMyYahoo">Yahoo Fantasy Sports</a></h2>' + 
+                '</div></div></div>' +  
+                '<div id="baseball"></div><div id="football"></div>' +
+                FooterHTML + '</div>';      
       
-          // Added Event listeners for SetURL button and mouseup (to check if our applet has moved)
-        var setURLbtn=document.getElementById("fantasyURLbtn");
-        setURLbtn.addEventListener("click", gmSetFantasyURLValue, false);
-        document.addEventListener("mouseup", gmSetFantasyPosition, false);
-        currentElement = document.getElementById(FANTASY_APPLET_ID);
+            // Added Event listeners mouseup (to check if our applet has moved)
+            document.addEventListener("mouseup", gmSetFantasyPosition, false);
+            currentElement = document.getElementById(FANTASY_APPLET_ID);
+        }    
         
-        document.getElementById("fantasyURLInput").defaultValue = fantasyURL;
+        getFantasyPageBySport("baseball");
+        getFantasyPageBySport("football");
         
-        debug("Fantasy added " + currentElement.id + " as " + fantasyURL);
-        
-    }
+        debug("Fantasy div added " + currentElement.id);   
 
-    debug("My Yahoo - Add FBB Link");
-    GetFantasyPage();
-  
-// ----------------------------------------------------------------------------------------------
+}
+
+function getFantasyPageBySport(sportName)
+{
+    var sportURL = 'http://' + sportName + '.fantasysports.yahoo.com';               
+    GM_xmlhttpRequest({
+        method: "GET",
+        url: sportURL,
+            onerror: function(response) {
+               debug ('failed to load ' + sportURL);
+            },
+            onload: function(response) {
+                addSportToElement(response, sportName);
+            }
+    });  
+}
+
+function addSportToElement(response, sportName)
+{
+    var i;
+    debug ('addSportToElement for ' + sportName);
+    var baseURL = 'http://' + sportName + '.fantasysports.yahoo.com'; 
+        
+    var currentElement = document.getElementById(FANTASY_APPLET_ID);
+    if (currentElement === null) {
+        debug ('addSportToElement could not find id ' + FANTASY_APPLET_ID);
+        return;
+    }
+    var sportDiv = document.getElementById(sportName);
+    if (sportDiv === null) {
+        debug ('addSportToElement could not find div id ' + sportName);
+        return;
+    }
+        
+    var parser = new DOMParser();
+    var doc = parser.parseFromString(response.responseText, "text/html");                             
+    var scoresElement = doc.getElementById('gamehome-teams');
+    
+    var leagues = scoresElement.getElementsByTagName('h3');
+    var anchors = scoresElement.getElementsByTagName('a');
+    var scores = scoresElement.getElementsByClassName('Fz-lg');
+    // Ugh, this is very fragile
+    // Anchors should be in order: League, Matchup, Team 1, Team 1 img, Team 2 img, Team 2
+    // I could only get the scores from the Fz-lg class, whatever that is. Yuck, yuck, yuck.
+    if (leagues.length > 2) {
+        for (i = 1; i < leagues.length; i++)
+        {
+            var leagueName = anchors[(i-1)*6].textContent;
+            var leagueURL = baseURL + anchors[(i-1)*6].getAttribute('href');
+            var matchupURL = baseURL + anchors[(i-1)*6+1].getAttribute('href');
+            var Team1Name = anchors[(i-1)*6+2].textContent;
+            var Team1URL = baseURL + anchors[(i-1)*6+2].getAttribute('href');
+            var Team2Name = anchors[(i-1)*6+5].textContent;
+            var Team2URL = baseURL + anchors[(i-1)*6+5].getAttribute('href');
+            var score1 = scores[(i-1)*2].textContent;
+            var score2 = scores[(i-1)*2+1].textContent;
+            var statTrackerURL  = leagueURL + '/loadstattracker';
+            var leagueNumber = leagueURL.slice(leagueURL.lastIndexOf('/')+1);
+            var statTrackerTarget = 'stattracker_' + leagueNumber; 
+            
+            var firstTeam = document.createElement('a');
+            firstTeam.setAttribute('href',Team1URL);
+            firstTeam.textContent = Team1Name;
+            var secondTeam = document.createElement('a');
+            secondTeam.setAttribute('href',Team2URL);
+            secondTeam.textContent = Team2Name;
+            var matchupLink = document.createElement('a');
+            matchupLink.setAttribute('href',matchupURL);
+            matchupLink.textContent = "View Matchup";
+            var statTrackerLink = document.createElement('a');
+            statTrackerLink.setAttribute('href',statTrackerURL);
+            statTrackerLink.setAttribute('target',statTrackerTarget);
+            statTrackerLink.className='Navtarget';
+            statTrackerLink.textContent = "Watch Live with StatTracker";
+            statTrackerLink.style.fontWeight = 'bold';
+            
+            var leagueScore = document.createElement('div');
+            var leagueTitle = document.createElement('span');
+            leagueTitle.className = 'Fw-b';
+            leagueTitle.innerHTML = '<a href = "' + leagueURL + '">' + leagueName + '</a>';
+            var table = document.createElement('table');
+            table.id = leagueName + 'table';
+            table.className = 'Bgc-02';
+            table.style.width = "100%";
+            var tr = table.insertRow(-1);
+            tr.insertCell(-1).appendChild( firstTeam );
+            tr.insertCell(-1).appendChild( document.createTextNode(score1) );
+            tr.cells[1].setAttribute('style', 'text-align:left');
+            tr.insertCell(-1).appendChild( matchupLink );
+            tr.cells[2].setAttribute('style', 'text-align:right');
+            tr = table.insertRow(-1);
+            tr.insertCell(-1).appendChild( secondTeam );
+            tr.insertCell(-1).appendChild( document.createTextNode(score2) );
+            tr.cells[1].setAttribute('style', 'text-align:left');
+            tr = table.insertRow(-1);
+            tr.insertCell(-1).appendChild( statTrackerLink );   
+            
+            if (i > 1) {
+                leagueScore.appendChild(document.createElement('br'));
+            }
+            leagueScore.appendChild(leagueTitle);
+            leagueScore.appendChild(table);
+            sportDiv.appendChild(leagueScore);
+        }
+    }
+}
+
