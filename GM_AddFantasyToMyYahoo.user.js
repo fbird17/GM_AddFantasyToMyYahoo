@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            GM_AddFantasyToMyYahoo
-// @version         0.0.
+// @version         0.0.8
 // @namespace       https://github.com/fbird17
 // @description     Adds a Fantasy Baseball (and probably Football) link to the My Yahoo! homepage
 // @match           *://my.yahoo.com
@@ -118,6 +118,7 @@ function createFantasyDiv()
     // 1. What if firstApplet is weird?
     // 2. I would need to pull out a bunch of specific div's, like the settings button, so it didn't really buy me much in terms of abstracting the current HTML
     var FooterHTML = '<div class="App-Ft Row"><div data-region="footer" class="Fl-start Pos-r Z-1"><div class="js-applet-view-container-footer">' + 
+                            '<a href="https://github.com/fbird17/GM_AddFantasyToMyYahoo">About &raquo;</a>' +
                             '</div></div>' +
                             '<div class="App-Chrome_v2">' +
                               '</div>' +
@@ -136,7 +137,7 @@ function createFantasyDiv()
             newNode.outerHTML = '<div id="' + FANTASY_APPLET_ID + '" class=" App_v2  M-0 js-applet myyrss Zoom-1  Mt-20" data-applet-guid="' + FANTASY_APPLET_GUID + '">' +
                 '<div class="BrandBar" style="background-color:#6e329d;"><div class="Inner Fl-end"></div></div>' +
                 '<div class="App-Hd" data-region="header"><div class="js-applet-view-container-header"><div class="GridSpread">' +
-                '<h2 class="Grid-U App-Title"><a href="https://github.com/fbird17/GM_AddFantasyToMyYahoo">Yahoo Fantasy Sports</a></h2>' + 
+                '<h2 class="Grid-U App-Title"><a href="http://sports.yahoo.com/fantasy/">Yahoo Fantasy Sports</a></h2>' + 
                 '</div></div></div>' +  
                 '<div id="baseball"></div><div id="football"></div>' +
                 FooterHTML + '</div>';      
@@ -188,6 +189,10 @@ function addSportToElement(response, sportName)
     var parser = new DOMParser();
     var doc = parser.parseFromString(response.responseText, "text/html");                             
     var scoresElement = doc.getElementById('gamehome-teams');
+    if (scoresElement === null) {
+        debug ('id gamehome-teams not found for ' + sportName);
+        return;
+    }
     
     var leagues = scoresElement.getElementsByTagName('h3');
     var anchors = scoresElement.getElementsByTagName('a');
