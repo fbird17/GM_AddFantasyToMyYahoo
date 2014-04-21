@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            GM_AddFantasyToMyYahoo
-// @version         0.0.8
+// @version         0.0.9
 // @namespace       https://github.com/fbird17
 // @description     Adds a Fantasy Baseball (and probably Football) link to the My Yahoo! homepage
 // @match           *://my.yahoo.com
@@ -18,6 +18,7 @@
 //Version 0.0.6: 3/26/2014: Got rid of Lock button and replaced with mouseup event
 //Version 0.0.7: 3/28/2014: Added Firefox support
 //Version 0.0.8: 4/02/2014: Got rid of SetURL and just look at leagues directly. More fragile, but more user friendly.
+//Version 0.0.9: 4/21/2014: Added Rotisserie league support
    
 // TODO:
 // 1. Gave up on integrating a settings button - kept crashing because Yahoo stores functions on its server.
@@ -194,13 +195,14 @@ function addSportToElement(response, sportName)
         return;
     }
     
+    // Head-to-Head
     var leagues = scoresElement.getElementsByTagName('h3');
     var anchors = scoresElement.getElementsByTagName('a');
     var scores = scoresElement.getElementsByClassName('Fz-lg');
     // Ugh, this is very fragile
     // Anchors should be in order: League, Matchup, Team 1, Team 1 img, Team 2 img, Team 2
     // I could only get the scores from the Fz-lg class, whatever that is. Yuck, yuck, yuck.
-    if (leagues.length > 2) {
+    if (leagues.length >= 2) {
         for (i = 1; i < leagues.length; i++)
         {
             var leagueName = anchors[(i-1)*6].textContent;
@@ -261,5 +263,94 @@ function addSportToElement(response, sportName)
             sportDiv.appendChild(leagueScore);
         }
     }
+    
+    // Rotisserie
+    var srcTable = null;
+    debug ("Looking for Rotisserie");
+    var srcTables = scoresElement.getElementsByTagName('table');
+    for (i=0; (i < srcTables.length) && (srcTable == null); i++) {
+        if (srcTables[i].rows[0].cells[0].textContent == "Teams - Rotisserie") {
+            srcTable = srcTables[i];
+        }
+    }
+        
+    if (srcTable != null) {
+       
+        debug ("Found Rotisserie");
+        if (leagues.length >= 2) {
+            sportDiv.appendChild(document.createElement('br'));   
+        }
+        
+        var leagueScore = document.createElement('div');
+        var leagueTitle = document.createElement('span');
+        leagueTitle.className = 'Fw-b';
+        leagueTitle.innerHTML = 'Rotisserie ' + sportName;
+        var rTable = document.createElement('table');
+        rTable.id = 'Rotisserie_' + sportName + '_table';
+        rTable.style.width = "100%";
+        var tr = rTable.insertRow(-1);
+        tr.insertCell(-1).appendChild( document.createTextNode('Name') );
+        tr.insertCell(-1).appendChild( document.createTextNode('Rank') );
+        tr.insertCell(-1).appendChild( document.createTextNode('Points') );
+        tr.insertCell(-1).appendChild( document.createTextNode('Pts Back') );
+        tr.insertCell(-1);
+        tr.cells[2].setAttribute('style', 'text-align:right');
+        tr.cells[3].setAttribute('style', 'text-align:right');
+        
+        var numRows = srcTable.rows.length;
+        
+        for (i=1; i< numRows; i++) {
+            var currRow = srcTable.rows[i];
+                
+            var teamName = currRow.cells[0].textContent.split(" League: ")[0];
+            var leagueName = currRow.cells[0].textContent.split(" League: ")[1];
+            var anchors = currRow.cells[0].getElementsByTagName('a');
+            var teamURL = baseURL + anchors[0].getAttribute('href');
+            var leagueURL = baseURL + anchors[2].getAttribute('href');
+            debug("Adding " + teamName);
+            
+            var rank = currRow.cells[1].textContent;
+            var points = currRow.cells[2].textContent;
+            var pointDiff = currRow.cells[3].textContent;
+            pointDiff = pointDiff.split(" ")[0];
+        
+            var teamNode = document.createElement('a');
+            teamNode.setAttribute('href',teamURL);
+            teamNode.textContent = teamName;
+            var leagueNode = document.createElement('a');
+            leagueNode.setAttribute('href',leagueURL);
+            leagueNode.textContent = leagueName;
+            var statTrackerURL  = leagueURL + '/loadstattracker';
+            var leagueNumber = leagueURL.slice(leagueURL.lastIndexOf('/')+1);
+            var statTrackerTarget = 'stattracker_' + leagueNumber; 
+            var statTrackerLink = document.createElement('a');
+            statTrackerLink.setAttribute('href',statTrackerURL);
+            statTrackerLink.setAttribute('target',statTrackerTarget);
+            statTrackerLink.className='Navtarget';
+            statTrackerLink.textContent = "StatTracker";
+            
+            var tr = rTable.insertRow(-1);
+            tr.className = 'Bgc-02';
+            tr.insertCell(-1).appendChild( teamNode );
+            tr.insertCell(-1).appendChild( document.createTextNode(rank) );
+            tr.insertCell(-1).appendChild( document.createTextNode(points) );
+            tr.insertCell(-1).appendChild( document.createTextNode(pointDiff) );
+            tr.insertCell(-1).appendChild( statTrackerLink );
+            tr.cells[2].setAttribute('style', 'text-align:right');
+            tr.cells[3].setAttribute('style', 'text-align:right');
+            tr.cells[4].setAttribute('style', 'text-align:right');
+            tr = rTable.insertRow(-1);
+            tr.className = 'Bgc-02';
+            tr.insertCell(-1).appendChild( leagueNode );
+            tr.insertCell(-1);
+            tr.insertCell(-1);
+            tr.insertCell(-1);
+            tr.insertCell(-1);
+        }
+        leagueScore.appendChild(leagueTitle);
+        leagueScore.appendChild(rTable);
+        sportDiv.appendChild(leagueScore);
+    }
+    
 }
 
