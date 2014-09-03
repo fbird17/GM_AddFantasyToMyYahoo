@@ -2,7 +2,7 @@
 // @name            GM_AddFantasyToMyYahoo
 // @version         0.0.9
 // @namespace       https://github.com/fbird17
-// @description     Adds a Fantasy Baseball (and probably Football) link to the My Yahoo! homepage
+// @description     Adds Fantasy Baseball and Football links to the My Yahoo! homepage
 // @match           *://my.yahoo.com
 // @match           *://my.yahoo.com/*
 // @include         *://my.yahoo.com
@@ -19,11 +19,13 @@
 //Version 0.0.7: 3/28/2014: Added Firefox support
 //Version 0.0.8: 4/02/2014: Got rid of SetURL and just look at leagues directly. More fragile, but more user friendly.
 //Version 0.0.9: 4/21/2014: Added Rotisserie league support
-   
+//Version 0.1.0: 9/2/2014:  Tested with football. Seems to work. Listed football first. 
+
 // TODO:
 // 1. Gave up on integrating a settings button - kept crashing because Yahoo stores functions on its server.
 // 2. Make StatTracker launch in separate window (and verify its the same window as from Yahoo Sports)
 // 3. Can I update scores automatically?
+// 4. Would be nice if the order of football and baseball was configurable (or you could choose which ones you wanted)
 //
 
     var FANTASY_APPLET_GUID = "bf76f7";
@@ -148,9 +150,9 @@ function createFantasyDiv()
             currentElement = document.getElementById(FANTASY_APPLET_ID);
         }    
         
-        getFantasyPageBySport("baseball");
         getFantasyPageBySport("football");
-        
+        getFantasyPageBySport("baseball");
+                
         debug("Fantasy div added " + currentElement.id);   
 
 }
