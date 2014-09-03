@@ -142,7 +142,7 @@ function createFantasyDiv()
                 '<div class="App-Hd" data-region="header"><div class="js-applet-view-container-header"><div class="GridSpread">' +
                 '<h2 class="Grid-U App-Title"><a href="http://sports.yahoo.com/fantasy/">Yahoo Fantasy Sports</a></h2>' + 
                 '</div></div></div>' +  
-                '<div id="baseball"></div><div id="football"></div>' +
+                '<div id="football"></div><div id="baseball"></div>' +
                 FooterHTML + '</div>';      
       
             // Added Event listeners mouseup (to check if our applet has moved)
@@ -150,8 +150,8 @@ function createFantasyDiv()
             currentElement = document.getElementById(FANTASY_APPLET_ID);
         }    
         
-        getFantasyPageBySport("football");
         getFantasyPageBySport("baseball");
+        getFantasyPageBySport("football");
                 
         debug("Fantasy div added " + currentElement.id);   
 
