@@ -1,12 +1,10 @@
 // ==UserScript==
 // @name            GM_AddFantasyToMyYahoo
-// @version         0.1.0
+// @version         0.1.1
 // @namespace       https://github.com/fbird17
 // @description     Adds Fantasy Baseball and Football links to the My Yahoo! homepage
-// @match           *://my.yahoo.com
-// @match           *://my.yahoo.com/*
-// @include         *://my.yahoo.com
-// @include         *://my.yahoo.com/*
+// @match           https://my.yahoo.com/
+// @match           https://my.yahoo.com/*
 // @grant           GM_getValue
 // @grant           GM_setValue
 // @grant           GM_xmlhttpRequest
