@@ -1,13 +1,20 @@
 // ==UserScript==
 // @name            GM_AddFantasyToMyYahoo
-// @version         0.1.1
+// @version         0.2.0
 // @namespace       https://github.com/fbird17
 // @description     Adds Fantasy Baseball and Football links to the My Yahoo! homepage
 // @match           https://my.yahoo.com/
 // @match           https://my.yahoo.com/*
+// @connect         self
+// @connect         https://greasemonkey.github.io
+// @connect         fantasysports.yahoo.com
+// @require         https://greasemonkey.github.io/gm4-polyfill/gm4-polyfill.js
 // @grant           GM_getValue
 // @grant           GM_setValue
 // @grant           GM_xmlhttpRequest
+// @grant           GM.getValue
+// @grant           GM.setValue
+// @grant           GM.xmlHttpRequest
 // @downloadURL     https://raw.githubusercontent.com/fbird17/GM_AddFantasyToMyYahoo/master/GM_AddFantasyToMyYahoo.user.js
 // ==/UserScript==
 
@@ -18,6 +25,7 @@
 //Version 0.0.8: 4/02/2014: Got rid of SetURL and just look at leagues directly. More fragile, but more user friendly.
 //Version 0.0.9: 4/21/2014: Added Rotisserie league support
 //Version 0.1.0: 9/2/2014:  Tested with football. Seems to work. Listed football first. 
+//Version 0.2.0: 11/16/2017:  Updated to work with Greasemonkey 4. 
 
 // TODO:
 // 1. Gave up on integrating a settings button - kept crashing because Yahoo stores functions on its server.
@@ -47,7 +55,7 @@
         return children[i];
     }
 
-    function gmSetFantasyPosition()
+    async function gmSetFantasyPosition()
     {
         var fantasyParentId = document.getElementById(FANTASY_APPLET_ID).parentNode.id;
         var fantasyNextSibling = document.getElementById(FANTASY_APPLET_ID).nextSibling;
@@ -63,9 +71,9 @@
         }
             
         debug("Setting value " + fantasyParentId + " and " + fantasyNextSiblingId);
-        fakeTimeout(function() { GM_setValue('fantasyParentId', fantasyParentId); });
-        fakeTimeout(function() { GM_setValue('fantasyNextSiblingId', fantasyNextSiblingId); });
-        debug ("Value is now " + GM_getValue('fantasyParentId') + " and " + GM_getValue('fantasyNextSiblingId'));   
+        fakeTimeout(function() { GM.setValue('fantasyParentId', fantasyParentId); });
+        fakeTimeout(function() { GM.setValue('fantasyNextSiblingId', fantasyNextSiblingId); });
+        debug ("Value is now " + await GM.getValue('fantasyParentId') + " and " + await GM.getValue('fantasyNextSiblingId'));   
     }
 
     function setRecursiveCallback(element, eventName, callback) 
@@ -93,14 +101,14 @@
     createFantasyDiv();
       
 // ----------------------------------------------------------------------------------------------
-function createFantasyDiv() 
+async function createFantasyDiv() 
 {
     // This is pretty weak error handling. Basically if anything has changed about the page, we give up and put it back at the top.
-    var fantasyParentId = GM_getValue('fantasyParentId', "applet-container-content_p1-c1");
+    var fantasyParentId = await GM.getValue('fantasyParentId', "applet-container-content_p1-c1");
     var fantasyNextSiblingId, firstApplet;
     try {
         firstApplet = getFirstChildId(document.getElementById(fantasyParentId));
-        fantasyNextSiblingId = GM_getValue('fantasyNextSiblingId', firstApplet.id);
+        fantasyNextSiblingId = await GM.getValue('fantasyNextSiblingId', firstApplet.id);
         debug ("1st try: fantasyNextSiblingId is " + fantasyNextSiblingId + " and fantasyParentId is " + fantasyParentId);
         if (fantasyNextSiblingId != undefined && fantasyNextSiblingId != "undefined" && fantasyNextSiblingId != "") {
             if (document.getElementById(fantasyNextSiblingId).parentElement.id != fantasyParentId) {
@@ -155,10 +163,10 @@ function createFantasyDiv()
 
 }
 
-function getFantasyPageBySport(sportName)
+async function getFantasyPageBySport(sportName)
 {
     var sportURL = 'http://' + sportName + '.fantasysports.yahoo.com';               
-    GM_xmlhttpRequest({
+    await GM.xmlHttpRequest({
         method: "GET",
         url: sportURL,
             onerror: function(response) {
